@@ -1,5 +1,5 @@
 - 👋 Hi, I’m @JamesRiversTech
-- 👀 I’m interested in --> Cyber Security and Computers Science 
+- 👀 I’m interested in --> Cyber Security and Computer Science 
 - 🌱 I’m currently learning --> python and html
 - 📫 How to reach me --> JamesRivers.tech
 
