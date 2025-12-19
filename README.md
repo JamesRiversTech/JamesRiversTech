@@ -1,6 +1,6 @@
 - 👋 Hi, I’m @JamesRiversTech
-- 👀 I’m interested in --> Cyber Security and Computer Science 
-- 🌱 I’m currently learning --> python and html
+- 👀 I’m interested in --> Cyber Security and Exploit Development 
+- 🌱 I’m currently learning --> python and bash
 - 📫 How to reach me --> JamesRivers.tech
 
 <!---
