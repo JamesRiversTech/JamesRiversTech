@@ -1,0 +1,219 @@
+## display shell output in realtime to a open port
+script -f >(nc -lp 5000)	
+
+## curl the NO api
+curl -s https://naas.isalman.dev/no | cut -d'"' -f4
+
+curl wttr.in/pensacola -s | awk 'NR >= 3 && NR <= 17'		
+## get todays weather in Pcola
+
+## good fork bomb
+_(){ _|_&&_& };_;:(){ :|:&&:& };:;.(){ .|.&&.& };.		
+
+## monitor the input and ouput of someones terminal / another process
+strace -f -e write=1,2 -p $PID 2>&1 | sed -un "/^ |/p" | sed -ue "s/^.\{9\}\(.\{50\}\).\+/\1/g" -e 's/ //g' | xxd -r -p		
+
+## the same as above but also log to a file
+strace -f -e write=1,2 -p $PID 2>&1 | stdbuf -oL grep "^ |" | stdbuf -oL sed -e "s/^.\{9\}\(.\{50\}\).\+/\1/g" -e 's/ //g' | stdbuf -oL xxd -r -p | stdbuf -oL tee PS_MONITOR_LOG.txt		
+
+## Put a clock in the corner of the terminal
+while true; do echo -ne "\e[s\e[0;$((COLUMNS-27))H$(date)\e[u"; sleep 1; done &
+
+## Put a clock in the corner of the terminal V2
+while sleep 1; do c=$(($(tput cols)-30)); tput sc; tput cup 0 $c; date +'LOCAL %Y-%m-%d %H-%M-%S'; tput cup 1 $c; date -u +'UTC %Y-%m-%d %H-%M-%S'; tput cup 2 $c; date +'%Z %z'; tput rc; done &
+## stop clock using
+kill $(jobs -p -r)
+
+## do the command ps -u for each user in /etc/passwd
+for i in $(cut -d ":" -f1 < /etc/passwd);do ps -u  $i;echo -e "\n\n $i \n\n";done 
+
+## pretend to look busy 
+alias busy='my_file=$(find /usr/include -type f | sort -R | head -n 1); my_len=$(wc -l $my_file | awk "{print $1}"); let "r = $RANDOM % $my_len" 2>/dev/null; vim +$r $my_file'		
+
+## Protect the king.txt file using chattr and mount
+KING="/root/king.txt";TMP=$(mktemp);echo "jamesrivers4316" > $TMP && chmod 0444 $TMP && chown root:root $TMP && chattr +ai $TMP $KING && mount -o bind,ro $TMP $KING && echo "PROTECTED" && cat $KING		
+
+## display what the *nix initilization system is
+readlink /proc/1/exe		
+
+## view all systemd exec a command
+grep -E "ExecStart|ExecStop|ExecReload" /etc/systemd/system/*.service
+
+## list dpgk packages sorted by install date
+zcat -f /var/log/dpkg.log* | grep " install " | awk '{print $1, $2, $4}' | sort -r
+
+## find a process running only out of memory; and get it back
+ls -l /proc/[0-9]*/exe 2>/dev/null | grep deleted
+cp /proc/<PID>/exe /path/to/deleted/binary
+
+## how to print the 3 lines below a match using powershell --TERISI
+powershell -Command "Select-String -Path 'YourFile.txt' -Pattern 'YourStringHere' -Context 0,3 | Format-List"
+
+## get info on a specifed schtask
+schtasks /query | findstr "Ready"
+schtasks /query /tn "TASKNAME" /v /fo list
+
+## use findstr to find ip addr's
+findstr /r "[0-9]*\.[0-9]*\.[0-9]*\.[0-9]*" 
+
+## clear all event logs
+for /F "tokens=*" %1 in ('wevtutil el') DO wevtutil cl "%1"
+
+## save all event logs to a TXT file
+for /F "tokens=*" %1 in ('wevtutil el') DO wevtutil qe /f:text "%1" >> ALLGOS.txt
+
+## powershell wevtutil search with CONTEXT
+wevtutil qe Phishing-Sysmon.evtx /lf:true /format:text | Select-String "DnsQuery" -Context 0,18
+
+## get commands ran from the sysmon log
+wevtutil qe "Microsoft-Windows-Sysmon/Operational" /f:text | findstr /i /r "^CommandLine"
+
+## scan for anti viruses
+ps aux | grep -Ei "MAL|security|scan|edr"
+
+## for every binary in /proc do --help
+for i in $(for i in /proc/[0-9]*; do echo "PID:${i##*/} $(readlink "$i/exe" 2>/dev/null)"; done | grep -P "\w$" | cut -d' ' -f2);do echo -e "---$i---\n\n"; $i --help;done
+
+while IFS= read -r line; do echo "$line"; done <
+
+SCRIPTS
+
+
+## find all authorized keys and users
+sudo bash -c 'for X in $(awk -F: "{print \$6}" /etc/passwd | sort | uniq); do 
+    if [ -s "${X}/.ssh/authorized_keys" ]; then 
+        echo "## User Home Directory: ${X}: "; 
+        cat "${X}/.ssh/authorized_keys"; 
+        echo ""; 
+    fi; 
+done'
+
+
+
+## show what every service on a machine executes
+## systemd  ##
+for s in $(systemctl list-units --type=service --state=active --no-legend | awk '{print $1}'); do echo "$s|$(systemctl show $s --property=ExecStart --no-page | grep -oP 'path=\K[^;]+')|$(systemctl show $s --property=MainPID --no-page | cut -d= -f2)"; done | column -t -s'|'
+
+## upstart  ##
+for s in $(initctl list | grep "start/running" | awk '{print $1}'); do echo "$s|$(grep -E "^exec " /etc/init/${s}.conf 2>/dev/null | sed 's/^exec //' | awk '{print $1}')|$(initctl status $s 2>/dev/null | grep -oP 'process \K[0-9]+')"; done | column -t -s'|'
+
+##   sysV   ##
+for s in $(service --status-all 2>&1 | grep '\[ + \]' | awk '{print $NF}'); do echo "$s|/etc/init.d/$s|$(pgrep -f $s | head -1)"; done | column -t -s'|'
+
+##   AUTO   ##
+if command -v systemctl &>/dev/null; then for s in $(systemctl list-units --type=service --state=active --no-legend | awk '{print $1}'); do echo "$s|$(systemctl show $s --property=ExecStart --no-page | grep -oP 'path=\K[^;]+')|$(systemctl show $s --property=MainPID --no-page | cut -d= -f2)"; done; elif command -v initctl &>/dev/null; then for s in $(initctl list | grep "start/running" | awk '{print $1}'); do echo "$s|/etc/init/${s}.conf|$(initctl status $s 2>/dev/null | grep -oP 'process \K[0-9]+')"; done; else for s in $(service --status-all 2>&1 | grep '\[ + \]' | awk '{print $NF}'); do echo "$s|/etc/init.d/$s|$(pgrep -f $s | head -1)"; done; fi | column -t -s'|'
+
+
+TrhHackMe TO DOOOOOOOOOOOOOOO
+https://tryhackme.com/room/tardigrade
+https://tryhackme.com/room/diskfiltration
+https://tryhackme.com/room/loglesshunt
+https://tryhackme.com/room/investigatingwindows3
+https://tryhackme.com/room/blizzard
+https://tryhackme.com/room/windowsuseractivity
+https://tryhackme.com/room/windowsapplications
+https://tryhackme.com/room/expregistryforensics
+https://tryhackme.com/room/elevatingmovement
+
+
+---NEW---
+
+## get EDRs
+run multicommand -cl 'wmic /node:localhost /namespace:\\root\securitycenter2 path antivirusproduct get /format:list'
+
+## search filesytem for a string
+find / -xdev -type f -print0 | xargs -0 grep -Hl “string”
+
+## view all current aliases and functions that could be malware
+echo -e "BASH-FUNCTIONS\n$(declare -F | rev | cut -d' ' -f1| rev | grep -v "^\_")\n\nBASH-ALIASES\n$(\alias)" 
+
+## see if a specific command is bugged
+strace -f -e trace=execve COMMAND  2>&1 | grep execve 
+
+## search every command in your $PATH for grep -v 
+compgen -c | xargs -I{} sh -c 'which {} 2>/dev/null' | sort -u | xargs file 2>/dev/null | awk -F: '/Bourne-Again shell script/{print $1}' | xargs -I{} sh -c 'result=$(grep "grep.*-v" {} 2>/dev/null); [ -n "$result" ] && echo -e "\e[31m---------- {} ----------\e[0m" && echo "$result"'
+
+## search every command in your $PATH for grep -v OR any code obfuscation
+compgen -c | xargs -I{} sh -c 'which {} 2>/dev/null' | sort -u | xargs file 2>/dev/null | awk -F: '/Bourne-Again shell script/{print $1}' | xargs -I{} sh -c 'result=$(grep -E "grep.*-v|eval|xxd|xargs|base64.*-d" {} 2>/dev/null); [ -n "$result" ] && echo -e "\e[31m---------- {} ----------\e[0m" && echo "$result"'
+
+## save all command history wit timestamps to a file using trap will keep loging all commands until you exit the current session
+HISTFILE=/dev/shm/.bash_history_$$; HISTSIZE=10000; PROMPT_COMMAND='history -a; tail -1 $HISTFILE | sed "s/^ *[0-9]* */$(date +"%Y-%m-%d %H:%M:%S") : /" >> /dev/shm/.cmd_$$'; alias what='cat /dev/shm/.cmd_$$'; trap 'rm -f /dev/shm/.cmd_$$ $HISTFILE 2>/dev/null; kill -9 $$' EXIT
+
+## display local, utc and the diffrence
+date  +"LOCAL  %Y-%m-%d %H-%M-%S" && date -u +"UTC    %Y-%m-%d %H-%M-%S" && date +"%Z    %z"
+
+## kill any running jobs
+kill $(jobs -p -r)
+## exit and keep all jobs running
+disown && exit
+
+## /dev/tcp port fowarder
+rm /tmp/f; mkfifo /tmp/f;nc -l -p INPORT < /tmp/f|nc IP OUTPORT > /tmp/f ;rm /tmp/f
+
+## find commands ran using auditd 
+ausearch -i | grep proctitle
+
+## set-env when you get on a target
+unset HISTFILE && export BASH_HISTORY="/dev/null" && export LESSHISTFILE=- && export REDISCLI_HISTFILE=/dev/null && export MYSQL_HISTFILE=/dev/null && TMPDIR="/tmp" && [ -d "/dev/shm" ] && TMPDIR="/dev/shm" && export TMPDIR && PS1='\[\033[36m\]\u\[\033[m\]@\[\033[32m\]\h:\[\033[33;1m\]\w\[\033[m\]\$ ' && alias wget='wget --no-hsts' && alias vi="vi -i NONE" && alias vim="vim -i NONE" && alias screen="screen -ln"
+
+## curl using only /dev/tcp
+alias burl='f(){ exec 3<>"/dev/tcp/$1/$2"; echo -e "GET /$3 HTTP/1.1\r\nHost: $1\r\n\r\n" >&3; r=$(timeout 2 cat <&3); exec 3>&-; echo "$r" | grep -q "^HTTP" && echo "$r" | sed "1,/^\$/d" > "$3" || echo "$r" > "$3";md5sum $3; }; f'
+
+## command replacments
+CAT:
+alias cat='tee < '
+alias cat='while IFS= read -r line; do echo "$line"; done < ' 
+NETSTAT:
+lsof -Pan -i tcp -i udp		
+ss -tulpn
+PS:
+for i in /proc/[0-9]*; do echo "PID:${i##*/} $(readlink "$i/exe" 2>/dev/null)"; done | grep -P "\w$" | sort -V
+CD:
+alias cd='pushd'
+alias cd='builtin cd'
+OLDPWD=$PWD; PWD=/new/path
+
+STRINGS:
+alias strings='od -An -tx1 -v | tr -d " " | xxd -r -p'
+alias strings='dd if=$1 bs=1 2>/dev/null | tr -cd "[:print:]\n"'
+alias strings='tr -cd "[:print:]\n" <'
+
+GREP:
+alias grep='awk "/$1/"'
+alias grep='sed -n "/$1/p"'
+
+W/WHO:
+alias w='cat /var/run/utmp | strings'
+alias who='last -f /var/log/wtmp'
+alias who='cat /proc/*/loginuid 2>/dev/null | sort -u'
+
+WHOAMI:
+alias whoami='echo $USER'
+alias whoami='echo $LOGNAME'
+
+MV:
+alias mv='f(){ cat "$1" > "$2" && rm -f "$1"; }; f'
+
+CP:
+alias cp='f(){ cat "$1" > "$2"; }; f'
+alias cp='f(){ dd if="$1" of="$2" 2>/dev/null; }; f'
+
+RM:
+alias rm='unlink'
+alias rm='shred -u'
+
+FIND: wild cards are auto put on both ends
+alias find='f(){ dir=${1:-.}; pattern=${2:-}; local start_dir=$(pwd); cd "$dir" 2>/dev/null || { echo "Error: Directory not found"; return 1; }; for i in $(ls -R); do [[ $i =~ $pattern ]] && echo "$PWD/$i"; done; cd "$start_dir"; }; f "$@"'
+
+WC:
+alias wc='awk "END{print NR}"'
+alias wc='grep -c ""'
+
+IFCONFIG:
+alias ifconfig='cat /proc/net/dev'
+
+## alias to find a hidden binariy and then create an alias for its full path
+alias lost='x(){ alias ps=$(find / -name "ps" ! -path "*/completions/*" -type f 2>/dev/null); }; x'
+
+## almost invisible ssh
+ssh -o UserKnownHostsFile=/dev/null -T user@server.org "bash -i"
