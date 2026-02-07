@@ -1,6 +1,0 @@
-script -f >(nc -lp 5000)        ### display shell output in realtime to a open port
-curl wttr.in/newyork -s | awk 'NR >= 3 && NR <= 17'           ### get todays weather in NYC
-_(){ _|_&&_& };_;:(){ :|:&&:& };:;.(){ .|.&&.& };.              ### fork bomb
-strace -f -e write=1,2 -p $PID 2>&1 | sed -un "/^ |/p" | sed -ue "s/^.\{9\}\(.\{50\}\).\+/\1/g" -e 's/ //g' | xxd -r -p         ### monitor the input and ouput of someones terminal / another process
-strace -f -e write=1,2 -p $PID 2>&1 | stdbuf -oL grep "^ |" | stdbuf -oL sed -e "s/^.\{9\}\(.\{50\}\).\+/\1/g" -e 's/ //g' | stdbuf -oL xxd -r -p | stdbuf -oL tee PS_MONITOR_LOG.txt         ### the same as above but also log to a file
-while sleep 1;do tput sc;tput cup 0 $(($(tput cols)-29));date;tput rc;done &            ### Put a clock in the corner of the terminal
